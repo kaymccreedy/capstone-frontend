@@ -38,4 +38,8 @@ nav a.router-link-exact-active {
 .img-small {
   width: 300px;
 }
+
+.img-full {
+  width: 90vw;
+}
 </style>

@@ -21,7 +21,7 @@ export default {
     getImages: function (product) {
       this.productImages = [];
       product.images.forEach((image) => {
-        this.productImages.push(image.url);
+        this.productImages.push(image);
       });
     },
     destroyProduct: function () {
@@ -37,14 +37,14 @@ export default {
 <template>
   <div class="product">
     <h4>{{ product.name }}</h4>
+    <h5>${{ product.price }}</h5>
     <br />
-    <p>{{ product.body }}</p>
+    {{ getImages(product) }}
+    <div v-for="image in productImages" v-bind:key="image.id">
+      <img class="img-full" :src="image.url" />
+    </div>
     <br />
     <br />
     <router-link to="/products">Back to Products</router-link>
-    |
-    <router-link :to="`/products/${product.id}/edit`">Edit Product</router-link>
-    <br />
-    <div class="link" v-on:click="destroyProduct">Delete Product</div>
   </div>
 </template>

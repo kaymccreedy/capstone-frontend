@@ -14,7 +14,7 @@ export default {
   },
   methods: {
     indexProducts: function () {
-      axios.get("products.json").then((response) => {
+      axios.get("/products.json").then((response) => {
         this.products = response.data;
         console.log("All Products: ", this.products);
       });
@@ -32,10 +32,6 @@ export default {
 <template>
   <div class="products">
     <h1>{{ message }}</h1>
-    <router-link to="/products/new">Create Product</router-link>
-    <br />
-    <br />
-    <br />
     <div v-for="product in products" v-bind:key="product.id">
       <router-link :to="`/products/${product.id}`">{{ product.name }}</router-link>
       <h5>${{ product.price }}</h5>

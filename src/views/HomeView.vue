@@ -13,6 +13,7 @@ export default {
 <template>
   <div class="home">
     <h1>{{ message }}</h1>
+    <router-link to="/products">Products</router-link>
   </div>
 </template>
 
