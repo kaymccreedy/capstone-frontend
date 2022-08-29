@@ -33,12 +33,12 @@ export default {
   <div class="products">
     <h1>{{ message }}</h1>
     <div v-for="product in products" v-bind:key="product.id">
-      <router-link :to="`/products/${product.id}`">{{ product.name }}</router-link>
-      <h5>${{ product.price }}</h5>
+      <router-link class="link" :to="`/products/${product.id}`">{{ product.name }}</router-link>
       {{ getImages(product) }}
       <div>
         <img class="img-small" :src="productImages[0]" />
       </div>
+      <h5>${{ product.price }}</h5>
       <br />
       <br />
     </div>

@@ -1,14 +1,25 @@
+<script>
+export default {
+  data: function () {
+    return {
+      isLoggedIn: false,
+    };
+  },
+  watch: {
+    $route: function () {
+      this.isLoggedIn = !!localStorage.jwt;
+    },
+  },
+};
+</script>
+
 <template>
   <nav>
-    <router-link to="/">Home</router-link>
-    |
-    <router-link to="/products">Products</router-link>
-    |
-    <router-link to="/signup">Signup</router-link>
-    |
-    <router-link to="/login">Login</router-link>
-    |
-    <router-link to="/logout">Logout</router-link>
+    <router-link class="link" to="/">Home</router-link>
+    <router-link class="link" to="/products">Products</router-link>
+    <router-link class="link" v-if="!isLoggedIn" to="/signup">Signup</router-link>
+    <router-link class="link" v-if="!isLoggedIn" to="/login">Login</router-link>
+    <router-link class="link" v-if="isLoggedIn" to="/logout">Logout</router-link>
   </nav>
   <router-view />
 </template>
@@ -41,5 +52,9 @@ nav a.router-link-exact-active {
 
 .img-full {
   width: 90vw;
+}
+
+.link {
+  margin: 10px;
 }
 </style>
