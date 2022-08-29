@@ -18,3 +18,17 @@ export default {
         console.log("All Orders: ", this.orders);
       });
     },
+  },
+};
+</script>
+
+<template>
+  <div class="orders">
+    <h1>{{ message }}</h1>
+    <div v-for="order in orders" v-bind:key="order.id">
+      <p>ID: {{ order.id }}</p>
+      <p>User: {{ order.user_id }}</p>
+      <p>Product: {{ order.product_id }}</p>
+    </div>
+  </div>
+</template>
