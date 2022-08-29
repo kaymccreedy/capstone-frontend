@@ -6,10 +6,12 @@ export default {
     return {
       product: [],
       productImages: [],
-      order: false,
+      orderParams: false,
+      submitted: false,
       quantity: "",
       newOrderParams: {},
       errors: [],
+      orderID: "",
     };
   },
   created: function () {
@@ -29,13 +31,14 @@ export default {
       this.newOrderParams.subtotal = this.quantity * this.product.price;
       this.newOrderParams.tax = this.newOrderParams.subtotal * 0.09;
       this.newOrderParams.total = this.newOrderParams.subtotal + this.newOrderParams.tax;
-      this.order = true;
+      this.orderParams = true;
     },
     submitOrder: function () {
-      this.newOrderParams.status = "completed";
+      this.submitted = true;
       axios
         .post("/orders", this.newOrderParams)
         .then((response) => {
+          this.orderID = response.data.id;
           console.log(response);
         })
         .catch((error) => {
@@ -43,6 +46,7 @@ export default {
           this.errors = ["Invalid quantity"];
         });
       this.quantity = "";
+      this.orderParams = false;
     },
   },
 };
@@ -57,13 +61,17 @@ export default {
     </div>
     <em>{{ product.description }}</em>
     <h5>${{ product.price }}</h5>
+    <div v-if="submitted">
+      <h5>Order complete!</h5>
+      <router-link :to="`/orders/${orderID}`">View Order</router-link>
+    </div>
     <h4>Order</h4>
-    <div v-if="!order">
+    <div v-if="!orderParams">
       <label>Quantity:</label>
       <input v-model="quantity" />
       <button @click="createOrder">Order</button>
     </div>
-    <div v-if="order">
+    <div v-if="orderParams">
       <p>Product: {{ product.name }}</p>
       <p>Quantity: {{ newOrderParams.quantity }}</p>
       <p>Subtotal: ${{ newOrderParams.subtotal }}</p>
