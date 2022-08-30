@@ -55,7 +55,6 @@ export default {
 <template>
   <div class="product">
     <h4>{{ product.name }}</h4>
-    <!-- {{ getImages() }} -->
     <div v-for="image in productImages" v-bind:key="image.id">
       <img class="img-full" :src="image.url" />
     </div>

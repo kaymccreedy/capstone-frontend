@@ -6,6 +6,7 @@ import LogoutView from "../views/LogoutView.vue";
 import ProductsIndex from "../views/ProductsIndex.vue";
 import ProductsShow from "../views/ProductsShow.vue";
 import OrdersIndex from "../views/OrdersIndex.vue";
+import OrdersShow from "../views/OrdersShow.vue";
 
 
 const routes = [
@@ -20,6 +21,7 @@ const routes = [
   { path: "/products", name: "products-index", component: ProductsIndex },
   { path: "/products/:id", name: "products-show", component: ProductsShow },
   { path: "/orders", name: "orders-index", component: OrdersIndex },
+  { path: "/orders/:id", name: "orders-show", component: OrdersShow },
 ];
 
 const router = createRouter({

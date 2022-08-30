@@ -17,6 +17,7 @@ export default {
   <nav>
     <router-link class="link" to="/">Home</router-link>
     <router-link class="link" to="/products">Products</router-link>
+    <router-link class="link" v-if="isLoggedIn" to="/orders">Orders</router-link>
     <router-link class="link" v-if="!isLoggedIn" to="/signup">Signup</router-link>
     <router-link class="link" v-if="!isLoggedIn" to="/login">Login</router-link>
     <router-link class="link" v-if="isLoggedIn" to="/logout">Logout</router-link>
@@ -35,6 +36,8 @@ export default {
 
 nav {
   padding: 30px;
+  margin: auto;
+  width: 30vw;
 }
 
 nav a {
