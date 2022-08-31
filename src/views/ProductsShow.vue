@@ -53,16 +53,16 @@ export default {
 </script>
 
 <template>
-  <div class="product">
-    <h4>{{ product.name }}</h4>
-    <div v-for="image in productImages" v-bind:key="image.id">
-      <img class="img-full" :src="image.url" />
-    </div>
+  <article id="product">
+    <h2 class="major">{{ product.name }}</h2>
+    <span class="image product" v-for="image in productImages" v-bind:key="image.id">
+      <img :src="image.url" alt="" />
+    </span>
     <em>{{ product.description }}</em>
     <h5>${{ product.price }}</h5>
     <div v-if="submitted">
       <h5>Order complete!</h5>
-      <router-link :to="`/orders/${orderID}`">View Order</router-link>
+      <a :href="`/orders/${orderID}`">View Order</a>
     </div>
     <h4>Order</h4>
     <div v-if="!orderParams">
@@ -80,6 +80,6 @@ export default {
     </div>
     <br />
     <br />
-    <router-link to="/products">Back to Products</router-link>
-  </div>
+    <a href="/products">Back to Products</a>
+  </article>
 </template>
