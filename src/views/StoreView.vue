@@ -6,42 +6,47 @@ export default {
     return {
       message: "Kay's Webstore",
       products: [],
-      productImages: {},
-      open: false,
+      productsImages: {},
+      productImages: [],
       isLoggedIn: false,
+      quantity: "",
+      newOrderParams: {},
+      orderParams: false,
+      submitted: true,
     };
   },
-  watch: {
-    $route: function () {
-      this.isLoggedIn = !!localStorage.jwt;
-    },
-  },
+  // watch: {
+  //   $route() {
+  //     this.isLoggedIn = !!localStorage.jwt;
+  //   },
+  // },
   created: function () {
     this.indexProducts();
     this.store();
+    this.isLoggedIn = !!localStorage.jwt;
   },
   methods: {
     store: function () {
       localStorage.setItem("store", true);
     },
+    notStore: function () {
+      localStorage.setItem("store", false);
+    },
     indexProducts: function () {
       axios.get("/products.json").then((response) => {
         this.products = response.data;
         console.log("All Products: ", this.products);
-        this.getImages();
+        this.getProductsImages();
       });
     },
-    getImages: function () {
-      this.productImages = [];
+    getProductsImages: function () {
+      this.productsImages = [];
       this.products.forEach((product) => {
-        this.productImages.push(product.images[0].url);
+        this.productsImages.push(product.images[0].url);
       });
     },
     productIndex: function () {
       document.querySelector("#products-index").showModal();
-    },
-    closeProductIndex: function () {
-      document.querySelector("#products-index").closeModal();
     },
     showProduct: function () {
       axios.get("/products/" + this.$route.params.id + ".json").then((response) => {
@@ -78,19 +83,33 @@ export default {
 </script>
 
 <template>
-  <div class="home">
+  <div class="store">
     <header id="header">
       <div class="content"></div>
       <nav>
         <ul>
-          <li><a href="/products">Products</a></li>
-          <li><a v-if="!isLoggedIn" href="/orders">Orders</a></li>
-          <li><a v-if="!isLoggedIn" href="/logout">Logout</a></li>
-          <li><a v-if="isLoggedIn" href="/login">Login</a></li>
-          <li><a v-if="isLoggedIn" href="/signup">Signup</a></li>
+          <li><a href="/#products">Products</a></li>
+          <li v-if="isLoggedIn"><a href="/orders">Orders</a></li>
+          <li v-if="isLoggedIn"><a href="/logout">Logout</a></li>
+          <li v-if="!isLoggedIn"><a href="/login">Login</a></li>
+          <li v-if="!isLoggedIn"><a href="/signup">Signup</a></li>
+        </ul>
+      </nav>
+      <nav>
+        <ul>
+          <li><a href="/">Home</a></li>
         </ul>
       </nav>
     </header>
+    <!-- <div id="main">
+      <article id="products">
+        <h2 class="major">Products</h2>
+        <p>Click on any image below to learn more</p>
+        <span class="image product" v-for="product in products" v-bind:key="product.id">
+          <a class="image" :href="`/products/${product.id}`"><img :src="productImages[product.id - 1]" alt="" /></a>
+        </span>
+      </article>
+    </div> -->
   </div>
 </template>
 

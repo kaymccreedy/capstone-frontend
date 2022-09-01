@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 /*
 	Dimension by HTML5 UP
 	html5up.net | @ajlkn
@@ -311,6 +312,7 @@
 				// Article visible? Hide.
 					if ($body.hasClass('is-article-visible'))
 						$main._hide(true);
+						console.log(event);
 
 			});
 
