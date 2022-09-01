@@ -6,7 +6,6 @@ export default {
     return {
       message: "Orders",
       orders: [],
-      num: "",
     };
   },
   created: function () {
@@ -19,9 +18,6 @@ export default {
         console.log("All Orders: ", this.orders);
       });
     },
-    randomNum: function () {
-      this.num = Math.floor(Math.random() * 10000);
-    },
   },
 };
 </script>
@@ -30,7 +26,6 @@ export default {
   <div class="orders">
     <h1>{{ message }}</h1>
     <div v-for="order in orders" v-bind:key="order.id">
-      {{ randomNum() }}
       <h4>
         Order ID:
         <a :href="`/orders/${order.id}`">{{ order.id }}</a>

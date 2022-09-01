@@ -25,9 +25,9 @@ export default {
     this.isLoggedIn = !!localStorage.jwt;
   },
   methods: {
-    // store: function () {
-    //   localStorage.setItem("store", true);
-    // },
+    store: function () {
+      localStorage.setItem("store", true);
+    },
     indexProducts: function () {
       axios.get("/products.json").then((response) => {
         this.products = response.data;

@@ -16,16 +16,14 @@ export default {
 </script>
 
 <template>
-  <div id="app">
-    <router-view />
-    <!-- <footer id="footer">
+  <router-view />
+  <!-- <footer id="footer">
       <p class="copyright">
         &copy; Kay McCreedy. Design:
         <a href="https://html5up.net">HTML5 UP</a>
         . Photos: Kay McCreedy
       </p>
     </footer> -->
-  </div>
 </template>
 
 <style></style>
