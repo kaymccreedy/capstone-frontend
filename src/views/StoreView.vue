@@ -22,16 +22,12 @@ export default {
   // },
   created: function () {
     this.indexProducts();
-    this.store();
     this.isLoggedIn = !!localStorage.jwt;
   },
   methods: {
-    store: function () {
-      localStorage.setItem("store", true);
-    },
-    notStore: function () {
-      localStorage.setItem("store", false);
-    },
+    // store: function () {
+    //   localStorage.setItem("store", true);
+    // },
     indexProducts: function () {
       axios.get("/products.json").then((response) => {
         this.products = response.data;

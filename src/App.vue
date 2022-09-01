@@ -12,11 +12,6 @@ export default {
       this.store = !!localStorage.store;
     },
   },
-  methods: {
-    notStore: function () {
-      localStorage.setItem("store", false);
-    },
-  },
 };
 </script>
 
