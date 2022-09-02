@@ -5,16 +5,6 @@ export default {
   data: function () {
     return {
       isLoggedIn: false,
-      store: false,
-      intro: false,
-      work: false,
-      about: false,
-      contact: false,
-      photography: false,
-      productsIndex: false,
-      productShow: false,
-      ordersIndex: false,
-      other: false,
       products: [],
       productsImages: {},
       product_id: "",
@@ -27,27 +17,20 @@ export default {
       errors: [],
       orderID: "",
       orders: [],
+      order: [],
+      orderProduct: [],
+      newUserParams: {},
+      newSessionParams: {},
     };
   },
   watch: {
     $route() {
       this.isLoggedIn = !!localStorage.jwt;
-      this.other =
-        this.store ||
-        this.intro ||
-        this.work ||
-        this.about ||
-        this.contact ||
-        this.photography ||
-        this.productsIndex ||
-        this.productsShow ||
-        this.ordersIndex;
     },
   },
   created: function () {
     this.indexProducts();
     this.isLoggedIn = !!localStorage.jwt;
-    this.indexOrders;
   },
   methods: {
     indexProducts: function () {
@@ -65,8 +48,7 @@ export default {
     },
     selectProduct: function (id) {
       this.product_id = id;
-      this.productsIndex = false;
-      this.productShow = true;
+      this.showProduct();
     },
     showProduct: function () {
       axios.get("/products/" + this.product_id + ".json").then((response) => {
@@ -82,6 +64,10 @@ export default {
       this.newOrderParams.tax = this.newOrderParams.subtotal * 0.09;
       this.newOrderParams.total = this.newOrderParams.subtotal + this.newOrderParams.tax;
       this.orderParams = true;
+      this.newOrderParams.subtotal = this.newOrderParams.subtotal.toFixed(2);
+      this.newOrderParams.tax = this.newOrderParams.tax.toFixed(2);
+      this.newOrderParams.total = this.newOrderParams.total.toFixed(2);
+      console.log("Order:", this.newOrderParams);
     },
     submitOrder: function () {
       this.submitted = true;
@@ -97,12 +83,65 @@ export default {
         });
       this.quantity = "";
       this.orderParams = false;
+      this.indexOrders();
+      console.log(this.orders);
     },
     indexOrders: function () {
       axios.get("/orders.json").then((response) => {
         this.orders = response.data;
         console.log("All Orders: ", this.orders);
       });
+    },
+    selectOrder: function (id) {
+      this.order_id = id;
+      this.showOrder();
+    },
+    showOrder: function () {
+      axios.get("/orders/" + this.order_id + ".json").then((response) => {
+        this.order = response.data;
+        this.message = "Order #" + response.data.id;
+        console.log("Order: ", this.order);
+        this.getProductInfo();
+      });
+    },
+    getProductInfo: function () {
+      var product_id = this.order.product_id;
+      axios.get(`/products/${product_id}.json`).then((response) => {
+        this.orderProduct = response.data;
+        console.log("Product Info: ", this.orderProduct);
+      });
+    },
+    signup: function () {
+      axios
+        .post("/users", this.newUserParams)
+        .then((response) => {
+          console.log(response.data);
+          this.$router.push("/#login");
+          this.newUserParams = {};
+        })
+        .catch((error) => {
+          this.errors = error.response.data.errors;
+        });
+    },
+    login: function () {
+      axios
+        .post("/sessions", this.newSessionParams)
+        .then((response) => {
+          axios.defaults.headers.common["Authorization"] = "Bearer " + response.data.jwt;
+          localStorage.setItem("jwt", response.data.jwt);
+          this.$router.push("/#store");
+        })
+        .catch((error) => {
+          console.log(error.response);
+          this.errors = ["Invalid email or password."];
+          this.email = "";
+          this.password = "";
+        });
+    },
+    logout: function () {
+      delete axios.defaults.headers.common["Authorization"];
+      localStorage.removeItem("jwt");
+      this.$router.push("/#store");
     },
   },
 };
@@ -130,13 +169,13 @@ export default {
         </nav>
         <nav>
           <ul>
-            <li v-if="!store">
-              <a href="/#store" @click="(store = true), (productsIndex = true)">
+            <li>
+              <a href="/#store">
                 Store
               </a>
             </li>
-            <li v-if="other">
-              <a href="/" @click="store = false">
+            <li>
+              <a href="/">
                 Home
               </a>
             </li>
@@ -147,7 +186,7 @@ export default {
       <!-- Main -->
       <div id="main">
         <!-- Intro -->
-        <article id="intro" v-if="intro">
+        <article id="intro">
           <h2 class="major">Intro</h2>
           <span class="image main"><img src="images/pic01.jpg" alt="" /></span>
           <p>
@@ -165,7 +204,7 @@ export default {
         </article>
 
         <!-- Work -->
-        <article id="work" v-if="work">
+        <article id="work">
           <h2 class="major">Work</h2>
           <span class="image main"><img src="images/pic02.jpg" alt="" /></span>
           <p>
@@ -184,88 +223,86 @@ export default {
         </article>
 
         <!-- Photography -->
-        <div v-if="photography">
-          <article id="photography">
-            <h2 class="major">Photography</h2>
-            <span class="image main"><img src="images/pic04.jpg" alt="" /></span>
-            <p>Below is a small selection of Kay's photography.</p>
-            <span class="image left">
-              <a class="image" href="#pic05"><img src="images/pic05.jpg" alt="" /></a>
-            </span>
-            <span class="image right">
-              <a class="image" href="#pic06"><img src="images/pic06.jpg" alt="" /></a>
-            </span>
-            <span class="image left">
-              <a class="image" href="#pic07"><img src="images/pic07.jpg" alt="" /></a>
-            </span>
-            <span class="image right">
-              <a class="image" href="#pic08"><img src="images/pic08.jpg" alt="" /></a>
-            </span>
-            <span class="image left">
-              <a class="image" href="#pic09"><img src="images/pic09.jpg" alt="" /></a>
-            </span>
-            <span class="image right">
-              <a class="image" href="#pic10"><img src="images/pic10.jpg" alt="" /></a>
-            </span>
-            <span class="image left">
-              <a class="image" href="#pic11"><img src="images/pic11.jpg" alt="" /></a>
-            </span>
-            <span class="image right">
-              <a class="image" href="#pic12"><img src="images/pic12.jpg" alt="" /></a>
-            </span>
-          </article>
+        <article id="photography">
+          <h2 class="major">Photography</h2>
+          <span class="image main"><img src="images/pic04.jpg" alt="" /></span>
+          <p>Below is a small selection of Kay's photography.</p>
+          <span class="image left">
+            <a class="image" href="#pic05"><img src="images/pic05.jpg" alt="" /></a>
+          </span>
+          <span class="image right">
+            <a class="image" href="#pic06"><img src="images/pic06.jpg" alt="" /></a>
+          </span>
+          <span class="image left">
+            <a class="image" href="#pic07"><img src="images/pic07.jpg" alt="" /></a>
+          </span>
+          <span class="image right">
+            <a class="image" href="#pic08"><img src="images/pic08.jpg" alt="" /></a>
+          </span>
+          <span class="image left">
+            <a class="image" href="#pic09"><img src="images/pic09.jpg" alt="" /></a>
+          </span>
+          <span class="image right">
+            <a class="image" href="#pic10"><img src="images/pic10.jpg" alt="" /></a>
+          </span>
+          <span class="image left">
+            <a class="image" href="#pic11"><img src="images/pic11.jpg" alt="" /></a>
+          </span>
+          <span class="image right">
+            <a class="image" href="#pic12"><img src="images/pic12.jpg" alt="" /></a>
+          </span>
+        </article>
 
-          <!-- Pic05 -->
-          <article class="photograph" id="pic05">
-            <span class="image fit"><img src="images/pic05.jpg" alt="" /></span>
-            <nav><a href="#photography">&#129044; Back</a></nav>
-          </article>
+        <!-- Pic05 -->
+        <article class="photograph" id="pic05">
+          <span class="image fit"><img src="images/pic05.jpg" alt="" /></span>
+          <nav><a href="#photography">&#129044; Back</a></nav>
+        </article>
 
-          <!-- Pic06 -->
-          <article class="photograph" id="pic06">
-            <span class="image fit"><img src="images/pic06.jpg" alt="" /></span>
-            <p><a href="#photography">&#129044; Back</a></p>
-          </article>
+        <!-- Pic06 -->
+        <article class="photograph" id="pic06">
+          <span class="image fit"><img src="images/pic06.jpg" alt="" /></span>
+          <p><a href="#photography">&#129044; Back</a></p>
+        </article>
 
-          <!-- Pic07 -->
-          <article class="photograph" id="pic07">
-            <span class="image fit"><img src="images/pic07.jpg" alt="" /></span>
-            <p><a href="#photography">&#129044; Back</a></p>
-          </article>
+        <!-- Pic07 -->
+        <article class="photograph" id="pic07">
+          <span class="image fit"><img src="images/pic07.jpg" alt="" /></span>
+          <p><a href="#photography">&#129044; Back</a></p>
+        </article>
 
-          <!-- Pic08 -->
-          <article class="photograph" id="pic08">
-            <span class="image fit"><img src="images/pic08.jpg" alt="" /></span>
-            <p><a href="#photography">&#129044; Back</a></p>
-          </article>
+        <!-- Pic08 -->
+        <article class="photograph" id="pic08">
+          <span class="image fit"><img src="images/pic08.jpg" alt="" /></span>
+          <p><a href="#photography">&#129044; Back</a></p>
+        </article>
 
-          <!-- Pic09 -->
-          <article class="photograph" id="pic09">
-            <span class="image fit"><img src="images/pic09.jpg" alt="" /></span>
-            <p><a href="#photography">&#129044; Back</a></p>
-          </article>
+        <!-- Pic09 -->
+        <article class="photograph" id="pic09">
+          <span class="image fit"><img src="images/pic09.jpg" alt="" /></span>
+          <p><a href="#photography">&#129044; Back</a></p>
+        </article>
 
-          <!-- Pic10 -->
-          <article class="photograph" id="pic10">
-            <span class="image fit"><img src="images/pic10.jpg" alt="" /></span>
-            <p><a href="#photography">&#129044; Back</a></p>
-          </article>
+        <!-- Pic10 -->
+        <article class="photograph" id="pic10">
+          <span class="image fit"><img src="images/pic10.jpg" alt="" /></span>
+          <p><a href="#photography">&#129044; Back</a></p>
+        </article>
 
-          <!-- Pic11 -->
-          <article class="photograph" id="pic11">
-            <span class="image fit"><img src="images/pic11.jpg" alt="" /></span>
-            <p><a href="#photography">&#129044; Back</a></p>
-          </article>
+        <!-- Pic11 -->
+        <article class="photograph" id="pic11">
+          <span class="image fit"><img src="images/pic11.jpg" alt="" /></span>
+          <p><a href="#photography">&#129044; Back</a></p>
+        </article>
 
-          <!-- Pic12 -->
-          <article class="photograph" id="pic12">
-            <span class="image fit"><img src="images/pic12.jpg" alt="" /></span>
-            <p><a href="#photography">&#129044; Back</a></p>
-          </article>
-        </div>
+        <!-- Pic12 -->
+        <article class="photograph" id="pic12">
+          <span class="image fit"><img src="images/pic12.jpg" alt="" /></span>
+          <p><a href="#photography">&#129044; Back</a></p>
+        </article>
 
         <!-- About -->
-        <article id="about" v-if="about">
+        <article id="about">
           <h2 class="major">About</h2>
           <span class="image main"><img src="images/pic03.jpg" alt="" /></span>
           <p>
@@ -279,7 +316,7 @@ export default {
         </article>
 
         <!-- Contact -->
-        <article id="contact" v-if="contact">
+        <article id="contact">
           <h2 class="major">Contact</h2>
           <form name="contact" netlify>
             <div class="fields">
@@ -316,21 +353,57 @@ export default {
         </article>
 
         <!-- Store -->
-        <div id="store" v-if="store">
+        <div id="store">
           <nav>
             <ul>
-              <li><a href="/#productsIndex" @click="productsIndex = true">Products</a></li>
-              <li v-if="isLoggedIn">
-                <a href="/#ordersIndex" @click="ordersIndex = true">Orders</a>
+              <li>
+                <a
+                  href="/#productsIndex"
+                  @click="
+                    {
+                      {
+                        indexProducts();
+                      }
+                    }
+                  "
+                >
+                  Products
+                </a>
               </li>
-              <li v-if="isLoggedIn"><a href="/logout">Logout</a></li>
-              <li v-if="!isLoggedIn"><a href="/login">Login</a></li>
-              <li v-if="!isLoggedIn"><a href="/signup">Signup</a></li>
+              <li v-if="isLoggedIn">
+                <a
+                  href="/#ordersIndex"
+                  @click="
+                    {
+                      {
+                        indexOrders();
+                      }
+                    }
+                  "
+                >
+                  Orders
+                </a>
+              </li>
+              <li v-if="isLoggedIn">
+                <a
+                  @click="
+                    {
+                      {
+                        logout();
+                      }
+                    }
+                  "
+                >
+                  Logout
+                </a>
+              </li>
+              <li v-if="!isLoggedIn"><a href="/#login">Login</a></li>
+              <li v-if="!isLoggedIn"><a href="/#signup">Signup</a></li>
             </ul>
           </nav>
 
           <!-- Products Index -->
-          <article id="productsIndex" v-if="productsIndex">
+          <article id="productsIndex">
             <h2 class="major">Products</h2>
             <p>Click on any image below to learn more</p>
             <span class="image product" v-for="product in products" v-bind:key="product.id">
@@ -351,8 +424,7 @@ export default {
           </article>
 
           <!-- Products Show -->
-          <article id="productsShow" v-if="productShow">
-            {{ showProduct() }}
+          <article id="productsShow">
             <h2 class="major">{{ product.name }}</h2>
             <span class="image product" v-for="image in productImages" v-bind:key="image.id">
               <img :src="image.url" alt="" />
@@ -362,7 +434,18 @@ export default {
             <h5>${{ product.price }}</h5>
             <div v-if="submitted">
               <h5>Order complete!</h5>
-              <a :href="`/orders/${orderID}`">View Order</a>
+              <a
+                href="/#ordersShow"
+                @click="
+                  {
+                    {
+                      selectOrder(orderID);
+                    }
+                  }
+                "
+              >
+                View Order
+              </a>
             </div>
             <h4>Order</h4>
             <div v-if="!orderParams">
@@ -380,20 +463,112 @@ export default {
             </div>
             <br />
             <br />
-            <a href="/#products" @click="(productShow = false), (productsIndex = true)">Back to Products</a>
+            <a href="/#products" @click="this.orderParams = false">Back to Products</a>
+          </article>
+
+          <!-- Orders Index -->
+          <article id="ordersIndex">
+            <h2 class="major">Orders</h2>
+            <div v-for="order in orders" v-bind:key="order.id">
+              <h4>
+                Order ID:
+                <a
+                  class="image"
+                  @click="
+                    {
+                      {
+                        selectOrder(order.id);
+                      }
+                    }
+                  "
+                  href="/#ordersShow"
+                >
+                  {{ order.id }}
+                </a>
+              </h4>
+            </div>
+          </article>
+
+          <!-- Orders Show -->
+          <article id="ordersShow">
+            <h2 class="major">Order #</h2>
+            <h4>ID: {{ order.id }}</h4>
+            <p>
+              <b>Product:</b>
+              {{ orderProduct.name }}
+            </p>
+            <p>
+              <b>Description:</b>
+              <em>&nbsp;{{ orderProduct.description }}</em>
+            </p>
+            <p>
+              <b>Size:</b>
+              <em>&nbsp;{{ orderProduct.size }}</em>
+            </p>
+            <p>
+              <b>Quantity:</b>
+              &nbsp;{{ order.quantity }}
+            </p>
+            <p>
+              <b>Subtotal:</b>
+              &nbsp;${{ order.subtotal }}
+            </p>
+            <p>
+              <b>Tax:</b>
+              &nbsp;${{ order.tax }}
+            </p>
+            <p>
+              <b>Total:</b>
+              &nbsp;${{ order.total }}
+            </p>
+          </article>
+
+          <!-- Signup -->
+          <article id="signup">
+            <form v-on:submit.prevent="signup()">
+              <h1>Signup</h1>
+              <ul>
+                <li v-for="error in errors" v-bind:key="error">{{ error }}</li>
+              </ul>
+              <div>
+                <label>Name:</label>
+                <input type="text" v-model="newUserParams.name" />
+              </div>
+              <div>
+                <label>Email:</label>
+                <input type="email" v-model="newUserParams.email" />
+              </div>
+              <div>
+                <label>Password:</label>
+                <input type="password" v-model="newUserParams.password" />
+              </div>
+              <div>
+                <label>Password confirmation:</label>
+                <input type="password" v-model="newUserParams.password_confirmation" />
+              </div>
+              <input type="submit" value="Sign Up" />
+            </form>
+          </article>
+
+          <!-- Login -->
+          <article id="login">
+            <form v-on:submit.prevent="login()">
+              <h1>Login</h1>
+              <ul>
+                <li v-for="error in errors" v-bind:key="error">{{ error }}</li>
+              </ul>
+              <div>
+                <label>Email:</label>
+                <input type="email" v-model="newSessionParams.email" />
+              </div>
+              <div>
+                <label>Password:</label>
+                <input type="password" v-model="newSessionParams.password" />
+              </div>
+              <input type="submit" value="Submit" />
+            </form>
           </article>
         </div>
-
-        <!-- Orders Index -->
-        <article id="ordersIndex" v-if="ordersIndex">
-          <h2 class="major">Orders</h2>
-          <div v-for="order in orders" v-bind:key="order.id">
-            <h4>
-              Order ID:
-              <a :href="`/orders/${order.id}`">{{ order.id }}</a>
-            </h4>
-          </div>
-        </article>
       </div>
 
       <!-- Footer -->
