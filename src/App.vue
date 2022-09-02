@@ -3,13 +3,11 @@ export default {
   data: function () {
     return {
       isLoggedIn: false,
-      store: false,
     };
   },
   watch: {
     $route() {
       this.isLoggedIn = !!localStorage.jwt;
-      this.store = !!localStorage.store;
     },
   },
 };

@@ -152,7 +152,7 @@ input, select, textarea {
 		-webkit-transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out, border-bottom-color 0.2s ease-in-out;
 		-ms-transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out, border-bottom-color 0.2s ease-in-out;
 		transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out, border-bottom-color 0.2s ease-in-out;
-		border-bottom: none;
+		border-bottom: dotted 1px rgba(255, 255, 255, 0.5);
 		text-decoration: none;
 		color: inherit;
 	}
@@ -698,16 +698,6 @@ input, select, textarea {
 			float: right;
 			top: 0.25em;
 		}
-
-		.image.product {
-			display: grid;
-			max-width: 45%;
-			margin-bottom: 2rem;
-		}
-
-			.image.product img {
-				width: 90vw;
-			}
 
 		.image.fit {
 			display: block;
@@ -1359,7 +1349,7 @@ input, select, textarea {
 				line-height: 2;
 			}
 
-		#header nav ul {
+		nav ul {
 			display: -moz-flex;
 			display: -webkit-flex;
 			display: -ms-flex;
@@ -1371,16 +1361,16 @@ input, select, textarea {
 			border-radius: 4px;
 		}
 
-			#header nav ul li {
+			nav ul li {
 				padding-left: 0;
 				border-left: solid 1px #fcfbf7;
 			}
 
-				#header nav ul li:first-child {
+				nav ul li:first-child {
 					border-left: 0;
 				}
 
-				#header nav ul li a {
+				nav ul li a {
 					display: block;
 					min-width: 7.5rem;
 					height: 2.75rem;
@@ -1391,15 +1381,15 @@ input, select, textarea {
 					border-bottom: 0;
 				}
 
-					#header nav ul li a:hover {
+					nav ul li a:hover {
 						background-color: rgba(255, 255, 255, 0.075);
 					}
 
-					#header nav ul li a:active {
+					nav ul li a:active {
 						background-color: rgba(255, 255, 255, 0.175);
 					}
 
-		#header nav.use-middle:after {
+		nav.use-middle:after {
 			content: '';
 			display: block;
 			position: absolute;
@@ -1410,7 +1400,7 @@ input, select, textarea {
 			background: #fcfbf7;
 		}
 
-		#header nav.use-middle ul li.is-middle {
+		nav.use-middle ul li.is-middle {
 			border-left: 0;
 		}
 
@@ -1493,7 +1483,7 @@ input, select, textarea {
 					padding: 2.5rem 0;
 				}
 
-				#header nav ul {
+				nav ul {
 					-moz-flex-direction: column;
 					-webkit-flex-direction: column;
 					-ms-flex-direction: column;
@@ -1502,23 +1492,23 @@ input, select, textarea {
 					max-width: 100%;
 				}
 
-					#header nav ul li {
+					nav ul li {
 						border-left: 0;
 						border-top: solid 1px #fcfbf7;
 					}
 
-						#header nav ul li:first-child {
+						nav ul li:first-child {
 							border-top: 0;
 						}
 
-						#header nav ul li a {
+						nav ul li a {
 							height: 3rem;
 							line-height: 3rem;
 							min-width: 0;
 							width: 100%;
 						}
 
-				#header nav.use-middle:after {
+				nav.use-middle:after {
 					display: none;
 				}
 
@@ -1571,7 +1561,7 @@ input, select, textarea {
 			max-width: 100%;
 			background-color: rgba(27, 31, 34, 0.85);
 			border-radius: 4px;
-			opacity: 0;
+			opacity: 1;
 		}
 
 			#main article.photograph {

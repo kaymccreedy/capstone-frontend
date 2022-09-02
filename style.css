@@ -119,6 +119,12 @@ ul {
   list-style: none;
 }
 
+li.close {
+  position: sticky;
+  margin-top: 10px;
+  margin-right: 10px;
+}
+
 blockquote,
 q {
   quotes: none;
