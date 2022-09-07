@@ -6,11 +6,14 @@ export default {
     return {
       isLoggedIn: false,
       link: "home",
+      photos: [],
+      photosImages: {},
+      photo_id: "",
+      photo: [],
+      photoImages: [],
       products: [],
-      productsImages: {},
-      product_id: "",
+      selectedProduct: [],
       product: [],
-      productImages: [],
       quantity: "",
       newOrderParams: {},
       orderParams: false,
@@ -20,6 +23,7 @@ export default {
       orders: [],
       order: [],
       orderProduct: [],
+      orderPhoto: [],
       newUserParams: {},
       newSessionParams: {},
     };
@@ -27,39 +31,77 @@ export default {
   watch: {
     $route() {
       this.isLoggedIn = !!localStorage.jwt;
+      localStorage.setItem("link", this.link);
+      console.log("Link:", localStorage.link);
+      console.log("Orders:", this.orders);
+      this.submitted = false;
+    },
+    selectedProduct() {
+      this.products.forEach((product) => {
+        if (product.name == this.selectedProduct) {
+          this.product = product;
+        }
+      });
+      console.log("Product:", this.product);
     },
   },
   created: function () {
+    this.stickyLink();
+    this.indexPhotos();
     this.indexProducts();
+    this.indexOrders();
+    this.showPhotoReload();
+    this.showOrderReload();
+    console.log("Link:", this.link);
     this.isLoggedIn = !!localStorage.jwt;
   },
   methods: {
+    stickyLink: function () {
+      if (localStorage.link) {
+        this.link = localStorage.link;
+      }
+    },
+    indexPhotos: function () {
+      axios.get("/photos.json").then((response) => {
+        this.photos = response.data;
+        console.log("Photos: ", this.photos);
+        this.getPhotosImages();
+      });
+    },
+    getPhotosImages: function () {
+      this.photosImages = [];
+      this.photos.forEach((photo) => {
+        this.photosImages.push(photo.images[0].url);
+      });
+    },
+    selectPhoto: function (id) {
+      this.photo_id = id;
+      localStorage.setItem("photo_id", this.photo_id);
+      this.showPhoto();
+    },
+    showPhoto: function () {
+      axios.get("/photos/" + this.photo_id + ".json").then((response) => {
+        this.photo = response.data;
+        this.photoImages = this.photo.images;
+        console.log("Photo", this.photo);
+      });
+      this.link = "photosShow";
+    },
+    showPhotoReload: function () {
+      if (localStorage.photo_id && this.link === "photosShow") {
+        this.photo_id = localStorage.photo_id;
+        this.showPhoto();
+      }
+    },
     indexProducts: function () {
       axios.get("/products.json").then((response) => {
         this.products = response.data;
-        console.log("Products: ", this.products);
-        this.getProductsImages();
-      });
-    },
-    getProductsImages: function () {
-      this.productsImages = [];
-      this.products.forEach((product) => {
-        this.productsImages.push(product.images[0].url);
-      });
-    },
-    selectProduct: function (id) {
-      this.product_id = id;
-      this.showProduct();
-    },
-    showProduct: function () {
-      axios.get("/products/" + this.product_id + ".json").then((response) => {
-        this.product = response.data;
-        this.productImages = this.product.images;
-        console.log("Product", this.product);
+        console.log("Products", this.products);
       });
     },
     createOrder: function () {
       this.newOrderParams.quantity = this.quantity;
+      this.newOrderParams.photo_id = this.photo.id;
       this.newOrderParams.product_id = this.product.id;
       this.newOrderParams.subtotal = this.quantity * this.product.price;
       this.newOrderParams.tax = this.newOrderParams.subtotal * 0.09;
@@ -95,21 +137,36 @@ export default {
     },
     selectOrder: function (id) {
       this.order_id = id;
+      localStorage.setItem("order_id", this.order_id);
       this.showOrder();
     },
     showOrder: function () {
       axios.get("/orders/" + this.order_id + ".json").then((response) => {
         this.order = response.data;
-        this.message = "Order #" + response.data.id;
         console.log("Order: ", this.order);
         this.getProductInfo();
+        this.getPhotoInfo();
       });
+      this.link = "ordersShow";
+    },
+    showOrderReload: function () {
+      if (localStorage.order_id && this.link === "ordersShow") {
+        this.order_id = localStorage.order_id;
+        this.showOrder();
+      }
     },
     getProductInfo: function () {
       var product_id = this.order.product_id;
       axios.get(`/products/${product_id}.json`).then((response) => {
         this.orderProduct = response.data;
         console.log("Product Info: ", this.orderProduct);
+      });
+    },
+    getPhotoInfo: function () {
+      var photo_id = this.order.photo_id;
+      axios.get(`/photos/${photo_id}.json`).then((response) => {
+        this.orderPhoto = response.data;
+        console.log("Photo Info: ", this.orderPhoto);
       });
     },
     signup: function () {
@@ -155,7 +212,7 @@ export default {
     <header id="header" v-if="link === 'home'">
       <div class="content">
         <div class="inner">
-          <h1><a href="/">Kay McCreedy</a></h1>
+          <h1>Kay McCreedy</h1>
           <p>Writer — Photographer — Musician — Prospective Coder</p>
         </div>
       </div>
@@ -167,7 +224,7 @@ export default {
           <li><a href="/#contact" @click="link = 'contact'">Contact</a></li>
         </ul>
       </nav>
-      <nav>
+      <nav id="store">
         <ul>
           <li>
             <a href="/#store" @click="link = 'store'">
@@ -177,18 +234,72 @@ export default {
         </ul>
       </nav>
     </header>
-    <nav class="close" v-if="link != 'home'">
-      <ul>
-        <li>
-          <a @click="link = 'home'">
-            Close
-          </a>
-        </li>
-      </ul>
-    </nav>
+
+    <!-- Store -->
+    <div id="header" v-if="link === 'store'">
+      <div class="content">
+        <div class="inner">
+          <h1>Kay McCreedy</h1>
+          <p>Writer — Photographer — Musician — Prospective Coder</p>
+        </div>
+      </div>
+      <!-- Store Nav -->
+      <div id="store" v-if="link === 'store'">
+        <nav>
+          <ul>
+            <li>
+              <a
+                href="/#photosIndex"
+                @click="
+                  {
+                    {
+                      indexPhotos();
+                      link = 'photosIndex';
+                    }
+                  }
+                "
+              >
+                Photos
+              </a>
+            </li>
+            <li v-if="isLoggedIn">
+              <a
+                href="/#ordersIndex"
+                @click="
+                  {
+                    {
+                      indexOrders();
+                      link = 'ordersIndex';
+                    }
+                  }
+                "
+              >
+                Orders
+              </a>
+            </li>
+            <li v-if="isLoggedIn">
+              <a
+                href="/#store"
+                @click="
+                  {
+                    {
+                      logout();
+                    }
+                  }
+                "
+              >
+                Logout
+              </a>
+            </li>
+            <li v-if="!isLoggedIn"><a href="/#login" @click="link = 'login'">Login</a></li>
+            <li v-if="!isLoggedIn"><a href="/#signup" @click="link = 'signup'">Signup</a></li>
+          </ul>
+        </nav>
+      </div>
+    </div>
 
     <!-- Main -->
-    <div id="main">
+    <div id="main" v-if="link !== 'store' && link !== 'home'">
       <!-- Intro -->
       <article id="intro" v-if="(link === 'intro')">
         <h2 class="major">Intro</h2>
@@ -220,95 +331,14 @@ export default {
           .
         </p>
         <p>
-          You can explore some of Kay's photography
-          <a href="#photography">here</a>
+          You can explore some of Kay's photography in the webstore
+          <a href="/#photos" @click="link = 'photosIndex'">here</a>
           .
         </p>
       </article>
 
-      <!-- Photography -->
-      <article id="photography" v-if="(link === 'photography')">
-        <h2 class="major">Photography</h2>
-        <span class="image main"><img src="images/pic04.jpg" alt="" /></span>
-        <p>Below is a small selection of Kay's photography.</p>
-        <span class="image left">
-          <a class="image" href="#pic05"><img src="images/pic05.jpg" alt="" /></a>
-        </span>
-        <span class="image right">
-          <a class="image" href="#pic06"><img src="images/pic06.jpg" alt="" /></a>
-        </span>
-        <span class="image left">
-          <a class="image" href="#pic07"><img src="images/pic07.jpg" alt="" /></a>
-        </span>
-        <span class="image right">
-          <a class="image" href="#pic08"><img src="images/pic08.jpg" alt="" /></a>
-        </span>
-        <span class="image left">
-          <a class="image" href="#pic09"><img src="images/pic09.jpg" alt="" /></a>
-        </span>
-        <span class="image right">
-          <a class="image" href="#pic10"><img src="images/pic10.jpg" alt="" /></a>
-        </span>
-        <span class="image left">
-          <a class="image" href="#pic11"><img src="images/pic11.jpg" alt="" /></a>
-        </span>
-        <span class="image right">
-          <a class="image" href="#pic12"><img src="images/pic12.jpg" alt="" /></a>
-        </span>
-      </article>
-
-      <!-- Pic05 -->
-      <div class="photograph" v-if="(link === 'photograph')">
-        <article class="photograph" id="pic05">
-          <span class="image fit"><img src="images/pic05.jpg" alt="" /></span>
-          <nav><a href="#photography">&#129044; Back</a></nav>
-        </article>
-
-        <!-- Pic06 -->
-        <article class="photograph" id="pic06">
-          <span class="image fit"><img src="images/pic06.jpg" alt="" /></span>
-          <p><a href="#photography">&#129044; Back</a></p>
-        </article>
-
-        <!-- Pic07 -->
-        <article class="photograph" id="pic07">
-          <span class="image fit"><img src="images/pic07.jpg" alt="" /></span>
-          <p><a href="#photography">&#129044; Back</a></p>
-        </article>
-
-        <!-- Pic08 -->
-        <article class="photograph" id="pic08">
-          <span class="image fit"><img src="images/pic08.jpg" alt="" /></span>
-          <p><a href="#photography">&#129044; Back</a></p>
-        </article>
-
-        <!-- Pic09 -->
-        <article class="photograph" id="pic09">
-          <span class="image fit"><img src="images/pic09.jpg" alt="" /></span>
-          <p><a href="#photography">&#129044; Back</a></p>
-        </article>
-
-        <!-- Pic10 -->
-        <article class="photograph" id="pic10">
-          <span class="image fit"><img src="images/pic10.jpg" alt="" /></span>
-          <p><a href="#photography">&#129044; Back</a></p>
-        </article>
-
-        <!-- Pic11 -->
-        <article class="photograph" id="pic11">
-          <span class="image fit"><img src="images/pic11.jpg" alt="" /></span>
-          <p><a href="#photography">&#129044; Back</a></p>
-        </article>
-
-        <!-- Pic12 -->
-        <article class="photograph" id="pic12">
-          <span class="image fit"><img src="images/pic12.jpg" alt="" /></span>
-          <p><a href="#photography">&#129044; Back</a></p>
-        </article>
-      </div>
-
       <!-- About -->
-      <article id="about" v-if="link === 'about'">
+      <article id="about" v-if="(link === 'about')">
         <h2 class="major">About</h2>
         <span class="image main"><img src="images/pic03.jpg" alt="" /></span>
         <p>
@@ -322,7 +352,7 @@ export default {
       </article>
 
       <!-- Contact -->
-      <article id="contact" v-if="link === 'contact'">
+      <article id="contact" v-if="(link === 'contact')">
         <h2 class="major">Contact</h2>
         <form name="contact" netlify>
           <div class="fields">
@@ -358,108 +388,79 @@ export default {
         </ul>
       </article>
 
-      <!-- Store -->
-      <div id="store" v-if="link === 'store'">
-        <nav>
-          <ul>
-            <li>
-              <a
-                href="/#productsIndex"
-                @click="
-                  {
-                    {
-                      indexProducts();
-                    }
-                  }
-                "
-              >
-                Products
-              </a>
-            </li>
-            <li v-if="isLoggedIn">
-              <a
-                href="/#ordersIndex"
-                @click="
-                  {
-                    {
-                      indexOrders();
-                    }
-                  }
-                "
-              >
-                Orders
-              </a>
-            </li>
-            <li v-if="isLoggedIn">
-              <a
-                @click="
-                  {
-                    {
-                      logout();
-                    }
-                  }
-                "
-              >
-                Logout
-              </a>
-            </li>
-            <li v-if="!isLoggedIn"><a href="/#login">Login</a></li>
-            <li v-if="!isLoggedIn"><a href="/#signup">Signup</a></li>
-          </ul>
-        </nav>
-
-        <!-- Products Index -->
-        <article id="productsIndex">
-          <h2 class="major">Products</h2>
-          <p>Click on any image below to learn more</p>
-          <span class="image.fit" v-for="product in products" v-bind:key="product.id">
-            <a
-              class="image fit"
-              @click="
+      <!-- Photos Index -->
+      <article id="photosIndex" v-if="(link === 'photosIndex')">
+        <h2 class="major">Photos</h2>
+        <p><em>Click on any image below to view products and place an order</em></p>
+        <span class="image fit" v-for="photo in photos" v-bind:key="photo.id">
+          <a
+            class="image fit"
+            @click="
+              {
                 {
-                  {
-                    selectProduct(product.id);
-                  }
+                  selectPhoto(photo.id);
                 }
-              "
-              href="/#productsShow"
-            >
-              <img class="image fit" :src="productsImages[product.id - 1]" alt="" />
-            </a>
-          </span>
-        </article>
+              }
+            "
+            href="/#photosShow"
+          >
+            <img class="image fit" :src="photosImages[photo.id - 1]" alt="" />
+          </a>
+        </span>
+      </article>
 
-        <!-- Products Show -->
-        <article id="productsShow">
-          <h2 class="major">{{ product.name }}</h2>
-          <span class="image product" v-for="image in productImages" v-bind:key="image.id">
-            <img :src="image.url" alt="" />
-          </span>
-          <br />
-          <em>{{ product.description }}</em>
-          <h5>${{ product.price }}</h5>
+      <!-- Photos Show -->
+      <article id="photosShow" v-if="(link === 'photosShow')">
+        <h2 class="major">{{ photo.name }}</h2>
+        <span v-for="image in photoImages" v-bind:key="image.id">
+          <img class="image fit" :src="image.url" alt="" />
+        </span>
+        <em>{{ photo.description }}</em>
+        <br />
+        <br />
+        <div v-if="!isLoggedIn">
+          <h3>
+            <em>
+              Please
+              <a href="/#login" @click="link = 'login'">login</a>
+              to place an order
+            </em>
+          </h3>
+        </div>
+        <div v-if="isLoggedIn">
           <div v-if="submitted">
-            <h5>Order complete!</h5>
-            <a
-              href="/#ordersShow"
-              @click="
-                {
+            <h3>
+              Order complete! •
+              <a
+                href="/#ordersShow"
+                @click="
                   {
-                    selectOrder(orderID);
+                    {
+                      selectOrder(orderID);
+                    }
                   }
-                }
-              "
-            >
-              View Order
-            </a>
+                "
+              >
+                View Order
+              </a>
+            </h3>
           </div>
-          <h4>Order</h4>
+          <h3>Order</h3>
           <div v-if="!orderParams">
-            <label>Quantity:</label>
-            <input v-model="quantity" />
+            <div>Product:</div>
+            <select v-model="this.selectedProduct">
+              <option disabled value="">Please select one</option>
+              <option v-for="product in products" v-bind:key="product.id">{{ product.name }}</option>
+            </select>
+            <div>Quantity:</div>
+            <input class="input" v-model="quantity" text-color: black />
             <button @click="createOrder">Order</button>
           </div>
           <div v-if="orderParams">
+            <p class="small">
+              <em>subtotal, tax, and total are pre-calculations and may not reflect exact price at checkout</em>
+            </p>
+            <p>Photo: {{ photo.name }}</p>
             <p>Product: {{ product.name }}</p>
             <p>Quantity: {{ newOrderParams.quantity }}</p>
             <p>Subtotal: ${{ newOrderParams.subtotal }}</p>
@@ -467,14 +468,22 @@ export default {
             <p>Total: ${{ newOrderParams.total }}</p>
             <button @click="submitOrder">Submit Order</button>
           </div>
-          <br />
-          <br />
-          <a href="/#products" @click="this.orderParams = false">Back to Products</a>
-        </article>
+        </div>
+      </article>
 
-        <!-- Orders Index -->
-        <article id="ordersIndex">
-          <h2 class="major">Orders</h2>
+      <!-- Orders Index -->
+      <article id="ordersIndex" v-if="(link === 'ordersIndex')">
+        <h2 class="major">Orders</h2>
+        <div v-if="orders.length == 0">
+          <h3>
+            <em>
+              You have no orders! Go to
+              <a href="/#photos" @click="link = 'photosIndex'">Photos</a>
+              to find something you like!
+            </em>
+          </h3>
+        </div>
+        <div v-if="orders != []">
           <div v-for="order in orders" v-bind:key="order.id">
             <h4>
               Order ID:
@@ -493,99 +502,178 @@ export default {
               </a>
             </h4>
           </div>
-        </article>
+        </div>
+      </article>
 
-        <!-- Orders Show -->
-        <article id="ordersShow">
-          <h2 class="major">Order #</h2>
-          <h4>ID: {{ order.id }}</h4>
-          <p>
-            <b>Product:</b>
-            {{ orderProduct.name }}
-          </p>
-          <p>
-            <b>Description:</b>
-            <em>&nbsp;{{ orderProduct.description }}</em>
-          </p>
-          <p>
-            <b>Size:</b>
-            <em>&nbsp;{{ orderProduct.size }}</em>
-          </p>
-          <p>
-            <b>Quantity:</b>
-            &nbsp;{{ order.quantity }}
-          </p>
-          <p>
-            <b>Subtotal:</b>
-            &nbsp;${{ order.subtotal }}
-          </p>
-          <p>
-            <b>Tax:</b>
-            &nbsp;${{ order.tax }}
-          </p>
-          <p>
-            <b>Total:</b>
-            &nbsp;${{ order.total }}
-          </p>
-        </article>
+      <!-- Orders Show -->
+      <article id="ordersShow" v-if="(link === 'ordersShow')">
+        <h2 class="major">Order #{{ order.id }}</h2>
+        <h4>ID: {{ order.id }}</h4>
+        <p>
+          <b>Photo:</b>
+          {{ orderPhoto.name }}
+        </p>
+        <p>
+          <b>Description:</b>
+          <em>&nbsp;{{ orderPhoto.description }}</em>
+        </p>
+        <p>
+          <b>Product:</b>
+          {{ orderProduct.name }}
+        </p>
+        <p>
+          <b>Product Description:</b>
+          <em>&nbsp;{{ orderProduct.description }}</em>
+        </p>
+        <p>
+          <b>Size:</b>
+          <em>&nbsp;{{ orderProduct.size }}</em>
+        </p>
+        <p>
+          <b>Price:</b>
+          &nbsp;${{ orderProduct.price }}
+        </p>
+        <p>
+          <b>Quantity:</b>
+          &nbsp;{{ order.quantity }}
+        </p>
+        <p>
+          <b>Subtotal:</b>
+          &nbsp;${{ order.subtotal }}
+        </p>
+        <p>
+          <b>Tax:</b>
+          &nbsp;${{ order.tax }}
+        </p>
+        <p>
+          <b>Total:</b>
+          &nbsp;${{ order.total }}
+        </p>
+      </article>
 
-        <!-- Signup -->
-        <article id="signup">
-          <form v-on:submit.prevent="signup()">
-            <h1>Signup</h1>
-            <ul>
-              <li v-for="error in errors" v-bind:key="error">{{ error }}</li>
-            </ul>
-            <div>
-              <label>Name:</label>
-              <input type="text" v-model="newUserParams.name" />
-            </div>
-            <div>
-              <label>Email:</label>
-              <input type="email" v-model="newUserParams.email" />
-            </div>
-            <div>
-              <label>Password:</label>
-              <input type="password" v-model="newUserParams.password" />
-            </div>
-            <div>
-              <label>Password confirmation:</label>
-              <input type="password" v-model="newUserParams.password_confirmation" />
-            </div>
-            <input type="submit" value="Sign Up" />
-          </form>
-        </article>
+      <!-- Signup -->
+      <article id="signup" v-if="(link === 'signup')">
+        <form v-on:submit.prevent="signup()">
+          <h1>Signup</h1>
+          <ul>
+            <li v-for="error in errors" v-bind:key="error">{{ error }}</li>
+          </ul>
+          <div>
+            <label>Name:</label>
+            <input type="text" v-model="newUserParams.name" />
+          </div>
+          <div>
+            <label>Email:</label>
+            <input type="email" v-model="newUserParams.email" />
+          </div>
+          <div>
+            <label>Password:</label>
+            <input type="password" v-model="newUserParams.password" />
+          </div>
+          <div>
+            <label>Password confirmation:</label>
+            <input type="password" v-model="newUserParams.password_confirmation" />
+          </div>
+          <input
+            type="submit"
+            value="Sign Up"
+            href="/#login"
+            @click="
+              {
+                {
+                  signup();
+                  link = 'login';
+                }
+              }
+            "
+          />
+        </form>
+        <h3>
+          <em>
+            Have an account?
+            <a href="/#login" @click="link = 'login'">Login here</a>
+          </em>
+        </h3>
+      </article>
 
-        <!-- Login -->
-        <article id="login">
-          <form v-on:submit.prevent="login()">
-            <h1>Login</h1>
-            <ul>
-              <li v-for="error in errors" v-bind:key="error">{{ error }}</li>
-            </ul>
-            <div>
-              <label>Email:</label>
-              <input type="email" v-model="newSessionParams.email" />
-            </div>
-            <div>
-              <label>Password:</label>
-              <input type="password" v-model="newSessionParams.password" />
-            </div>
-            <a href="/#store"><input type="submit" value="Submit" /></a>
-          </form>
-        </article>
-      </div>
+      <!-- Login -->
+      <article id="login" v-if="(link === 'login')">
+        <form v-on:submit.prevent="login()">
+          <h1>Login</h1>
+          <ul>
+            <li v-for="error in errors" v-bind:key="error">{{ error }}</li>
+          </ul>
+          <div>
+            <label>Email:</label>
+            <input type="email" v-model="newSessionParams.email" />
+          </div>
+          <div>
+            <label>Password:</label>
+            <input type="password" v-model="newSessionParams.password" />
+          </div>
+          <input
+            type="submit"
+            value="Submit"
+            @click="
+              {
+                {
+                  login();
+                  link = 'store';
+                }
+              }
+            "
+          />
+        </form>
+        <h3>
+          <em>
+            No account?
+            <a href="/#signup" @click="link = 'signup'">Signup here</a>
+          </em>
+        </h3>
+      </article>
     </div>
+    <div v-if="link !== 'home'">
+      <nav id="close">
+        <ul>
+          <li
+            v-if="
+              link === 'intro' ||
+              link === 'work' ||
+              link === 'about' ||
+              link === 'contact' ||
+              link === 'store' ||
+              link === 'photography'
+            "
+          >
+            <a href="/#" @click="link = 'home'">
+              Home
+            </a>
+          </li>
+          <li
+            v-if="
+              link === 'photosIndex' ||
+              link === 'photosShow' ||
+              link === 'ordersIndex' ||
+              link === 'ordersShow' ||
+              link === 'login' ||
+              link === 'signup'
+            "
+          >
+            <a href="/#store" @click="link = 'store'">
+              Close
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+    <footer id="footer">
+      <p class="copyright">
+        &copy; Kay McCreedy. Design:
+        <a href="https://html5up.net">HTML5 UP</a>
+        . Photos: Kay McCreedy
+      </p>
+    </footer>
   </div>
-
-  <!-- Footer -->
-  <footer id="footer">
-    <p class="copyright">
-      &copy; Kay McCreedy. Design:
-      <a href="https://html5up.net">HTML5 UP</a>
-      . Photos: Kay McCreedy
-    </p>
-  </footer>
 
   <!-- BG -->
   <div id="bg"></div>
