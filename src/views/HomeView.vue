@@ -78,6 +78,7 @@ export default {
       this.photo_id = id;
       localStorage.setItem("photo_id", this.photo_id);
       this.showPhoto();
+      this.link = "photosShow";
     },
     showPhoto: function () {
       axios.get("/photos/" + this.photo_id + ".json").then((response) => {
@@ -188,6 +189,7 @@ export default {
           axios.defaults.headers.common["Authorization"] = "Bearer " + response.data.jwt;
           localStorage.setItem("jwt", response.data.jwt);
           this.$router.push("/#store");
+          this.link = "store";
         })
         .catch((error) => {
           console.log(error.response);
@@ -332,7 +334,7 @@ export default {
         </p>
         <p>
           You can explore some of Kay's photography in the webstore
-          <a href="/#photos" @click="link = 'photosIndex'">here</a>
+          <a href="/#photosIndex" @click="link = 'photosIndex'">here</a>
           .
         </p>
       </article>
@@ -389,28 +391,31 @@ export default {
       </article>
 
       <!-- Photos Index -->
-      <article id="photosIndex" v-if="(link === 'photosIndex')">
+      <article id="photosIndex" class="photograph" v-if="(link === 'photosIndex')">
         <h2 class="major">Photos</h2>
         <p><em>Click on any image below to view products and place an order</em></p>
-        <span class="image fit" v-for="photo in photos" v-bind:key="photo.id">
-          <a
-            class="image fit"
-            @click="
-              {
-                {
-                  selectPhoto(photo.id);
-                }
-              }
-            "
-            href="/#photosShow"
-          >
-            <img class="image fit" :src="photosImages[photo.id - 1]" alt="" />
-          </a>
-        </span>
+        <div class="photogrid">
+          <span v-for="photo in photos" v-bind:key="photo.id">
+            <a href="/#photosShow">
+              <img
+                class="image grid"
+                :src="photosImages[photo.id - 1]"
+                alt=""
+                @click="
+                  {
+                    {
+                      selectPhoto(photo.id);
+                    }
+                  }
+                "
+              />
+            </a>
+          </span>
+        </div>
       </article>
 
       <!-- Photos Show -->
-      <article id="photosShow" v-if="(link === 'photosShow')">
+      <article id="photosShow" class="photograph" v-if="(link === 'photosShow')">
         <h2 class="major">{{ photo.name }}</h2>
         <span v-for="image in photoImages" v-bind:key="image.id">
           <img class="image fit" :src="image.url" alt="" />
@@ -618,7 +623,6 @@ export default {
               {
                 {
                   login();
-                  link = 'store';
                 }
               }
             "
@@ -649,17 +653,18 @@ export default {
               Home
             </a>
           </li>
-          <li
-            v-if="
-              link === 'photosIndex' ||
-              link === 'photosShow' ||
-              link === 'ordersIndex' ||
-              link === 'ordersShow' ||
-              link === 'login' ||
-              link === 'signup'
-            "
-          >
+          <li v-if="link === 'photosIndex' || link === 'ordersIndex' || link === 'login' || link === 'signup'">
             <a href="/#store" @click="link = 'store'">
+              Close
+            </a>
+          </li>
+          <li v-if="link === 'photosShow'">
+            <a href="/#photosIndex" @click="link = 'photosIndex'">
+              Close
+            </a>
+          </li>
+          <li v-if="link === 'ordersShow'">
+            <a href="/#ordersIndex" @click="link = 'ordersIndex'">
               Close
             </a>
           </li>
