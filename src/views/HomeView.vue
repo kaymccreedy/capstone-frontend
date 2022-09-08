@@ -636,6 +636,8 @@ export default {
         </h3>
       </article>
     </div>
+
+    <!-- Closers -->
     <div v-if="link !== 'home'">
       <nav id="close">
         <ul>
@@ -671,6 +673,8 @@ export default {
         </ul>
       </nav>
     </div>
+
+    <!-- Footer -->
     <footer id="footer">
       <p class="copyright">
         &copy; Kay McCreedy. Design:
