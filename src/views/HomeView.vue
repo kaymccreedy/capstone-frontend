@@ -307,16 +307,15 @@ export default {
         <h2 class="major">Intro</h2>
         <span class="image main"><img src="images/pic01.jpg" alt="" /></span>
         <p>
-          Kay McCreedy is a writer, photographer, and musician based out of Philadelphia. Finding that such pursuits,
-          while personally meaningful, are not particularly effective ways of earning a living, they have turned to
-          coding, and are hoping to plunge into the tech world by way of a coding bootcamp. If you are interested to
-          peruse their creative work, head
-          <a href="#work">here</a>
-          to learn more.
+          Kay McCreedy is a creative, enthusiastic web developer based in Philadelphia, PA. As a recent graduate of
+          Actualize Coding Bootcamp, they are now building on that foundation of coding skills on their own, developing
+          independent projects, contributing to opensource repositories, and expanding their knowledge of various
+          languages including JavaScript, Ruby, and Python.
         </p>
         <p>
-          However, if you've found your way to this site, you're most likely checking out Kay's coding skills. In that
-          case, go ahead and take a look around—they're confident you'll like what you see.
+          Outside of coding, Kay is a writer, musician, and photographer. You can find more in the
+          <a href="#work" @click="link = 'work'">Work</a>
+          section of this website, including a sampling of their coding projects and some of their photography.
         </p>
       </article>
 
@@ -325,10 +324,22 @@ export default {
         <h2 class="major">Work</h2>
         <span class="image main"><img src="images/pic02.jpg" alt="" /></span>
         <p>
-          Kay's work at this time encompasses several different mediums and forms, including a broad portfolio of
-          nature, landscape, abstract, and portrait photography; an ever-growing collection of unpublished poetry; and
-          various musical endeavors currently under development. They also frequently collaborate with other artists in
-          the Philadelphia scene on visual art and musical projects, including local band
+          As a recent graduate of Actualize Coding Bootcamp, Kay spent this summer studying full-stack web development,
+          including Ruby on Rails, Vue.js, Javascript, and Bootstrap. This period of study culminated in the creation of
+          a basic web store for selling prints of photography, including a frontend single-page application built with
+          npm, webpack, Vue.js, and HTML5 (
+          <a href="https://github.com/kaymccreedy/capstone-frontend">repo link</a>
+          ), and a backend RESTful API using MVC architecture built with Ruby on Rails (
+          <a href="https://github.com/kaymccreedy/capstone-api">repo link</a>
+          ). A live demo of the project can be found
+          <a href="https://sensational-marigold-b1bca2.netlify.app/">at this link</a>
+          .
+        </p>
+        <p>
+          Outside of coding, Kay works in several different mediums and forms, including a broad portfolio of nature,
+          landscape, abstract, and portrait photography; an ever-growing collection of unpublished poetry; and various
+          musical endeavors currently under development. They also frequently collaborate with other artists in the
+          Philadelphia scene on visual art and musical projects, including local band
           <a href="https://chewyphl.com">Chewy</a>
           .
         </p>
